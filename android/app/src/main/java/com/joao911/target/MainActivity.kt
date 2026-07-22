@@ -1,4 +1,4 @@
-package com.target
+package com.joao911.target
 
 import android.os.Build
 import android.os.Bundle

@@ -4,12 +4,19 @@
     "slug": "target",
     "version": "1.0.0",
     "android": {
+      "package": "com.joao911.target",
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#3d44cd"
       },
-      "ios": {}
+      "ios": {
+        "backgroundColor": "com.joao911.target",
+        "icon": "./assets/ios-icon.png"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.joao911.target"
     }
   }
 }
