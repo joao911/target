@@ -4,9 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "./styles";
 import { colors } from "@/theme";
 import { Divider } from "../Divider";
+import { Summary, SummaryProps } from "../Summary";
 
 export type HomeHeaderProps = {
   total: string;
+  input: SummaryProps;
+  output: SummaryProps;
 };
 
 type Props = {
@@ -24,6 +27,17 @@ export const HomeHeader = ({ data }: Props) => {
         <Text style={styles.total}>{data.total}</Text>
       </View>
       <Divider color={colors.blue[400]} />
+      <View style={styles.summary}>
+        <Summary
+          data={data.input}
+          icon={{ name: "arrow-upward", color: colors.green[500] }}
+        />
+        <Summary
+          data={data.output}
+          icon={{ name: "arrow-downward", color: colors.red[400] }}
+          isLeft
+        />
+      </View>
     </LinearGradient>
   );
 };
