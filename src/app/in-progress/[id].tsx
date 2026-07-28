@@ -3,8 +3,9 @@ import { useLocalSearchParams, router } from "expo-router";
 import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/Progress";
 import { List } from "@/components/List";
-import { TransactionType } from "@/utils/transationtypes";
+import { TransactionType } from "@/utils/transactionTypes";
 import { Transaction, TransactionProps } from "@/components/Transaction";
+import { Button } from "@/components/Button";
 
 export default function InProgress() {
   const param = useLocalSearchParams<{ id: string }>();
@@ -51,6 +52,12 @@ export default function InProgress() {
         renderItem={({ item }) => (
           <Transaction data={item} onRemove={() => {}} />
         )}
+        emptyMessage="Nenhuma transação cadastrada, toque para adicionar dinheiro"
+      />
+
+      <Button
+        title="Nova transação"
+        onPress={() => router.navigate(`/transaction/${param.id}`)}
       />
     </View>
   );

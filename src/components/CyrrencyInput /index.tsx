@@ -15,7 +15,7 @@ export const CurrencyInput = ({ label, error, ...rest }: InputProps) => {
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <Input
-        prefix="R$ "
+        prefix=" "
         delimiter="."
         separator=","
         precision={2}
