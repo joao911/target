@@ -3,7 +3,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/Progress";
 import { List } from "@/components/List";
-import { TransactionType } from "@/utils/transactionTypes";
+import { TransactionTypes } from "@/utils/transationtypes";
 import { Transaction, TransactionProps } from "@/components/Transaction";
 import { Button } from "@/components/Button";
 
@@ -23,14 +23,14 @@ export default function InProgress() {
       value: "R$ 50,00",
       date: "2023-01-01",
       description: "Tem descriçao",
-      type: TransactionType.Input,
+      type: TransactionTypes.Input,
     },
     {
       id: "2",
       value: "R$ 50,00",
       date: "2023-01-01",
       description: "Tem descriçao",
-      type: TransactionType.Output,
+      type: TransactionTypes.Output,
     },
   ];
 

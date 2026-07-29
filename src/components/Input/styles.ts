@@ -19,4 +19,9 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[400],
   },
+  textError: {
+    color: colors.red[400],
+    fontFamily: fontFamily.regular,
+    fontSize: 12,
+  },
 });
