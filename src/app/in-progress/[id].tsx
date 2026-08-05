@@ -1,21 +1,47 @@
 import { View } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
-import { PageHeader } from "@/components/PageHeader";
-import { Progress } from "@/components/Progress";
+import { useCallback, useState } from "react";
+import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
+
 import { List } from "@/components/List";
-import { TransactionTypes } from "@/utils/transationtypes";
-import { Transaction, TransactionProps } from "@/components/Transaction";
 import { Button } from "@/components/Button";
+import { Loading } from "@/components/Loading";
+import { Progress } from "@/components/Progress";
+import { PageHeader } from "@/components/PageHeader";
+import { TransactionTypes } from "@/utils/transationtypes";
+import { useTargetDataBase } from "@/database/useTargetDataBase";
+import { Transaction, TransactionProps } from "@/components/Transaction";
+import { currency } from "@/utils/formarCurrency";
 
 export default function InProgress() {
   const param = useLocalSearchParams<{ id: string }>();
-  const details = {
-    data: {
-      current: "R$ 580,00",
-      target: "R$ 1790,00",
-      percentage: 25,
-    },
-  };
+  const [loading, setLoading] = useState(true);
+
+  const [details, setDetails] = useState({
+    name: "",
+    current: "R$ 0,00",
+    target: "R$ 0,00",
+    percentage: 0,
+  });
+
+  const { getByID } = useTargetDataBase();
+
+  async function getData(id: string) {
+    try {
+      const response = await getByID(Number(id));
+
+      setDetails({
+        name: response?.name || "",
+        current: currency(response?.current || 0),
+        target: currency(response?.amount || 0),
+        percentage: Number(response?.percentage),
+      });
+      return response;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const transactions: TransactionProps[] = [
     {
@@ -34,17 +60,26 @@ export default function InProgress() {
     },
   ];
 
+  useFocusEffect(
+    useCallback(() => {
+      getData(String(param.id));
+    }, []),
+  );
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <View style={{ flex: 1, padding: 24, gap: 32 }}>
       <PageHeader
-        title="Meta"
-        subTitle="Economize para alcançar seus objetivos"
+        title={details.name}
         rightButton={{
           onPress: () => {},
           icon: "edit",
         }}
       />
-      <Progress data={details.data} />
+      <Progress data={details} />
       <List
         title="Transações"
         data={transactions}

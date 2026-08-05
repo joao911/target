@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { View } from "react-native";
+import { useState } from "react";
+import { View, Alert } from "react-native";
+import { router } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -7,11 +9,14 @@ import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { PageHeader } from "@/components/PageHeader";
 import { CurrencyInput } from "@/components/CyrrencyInput ";
+import { useTargetDataBase } from "@/database/useTargetDataBase";
 
 export default function Target() {
+  const { create } = useTargetDataBase();
+  const [loading, setLoading] = useState(false);
   const targetSchema = z.object({
     name: z.string().min(5, "Nome obrigatório"),
-    value: z
+    amount: z
       .number()
       .min(1, "Valor obrigatório")
       .superRefine((value, ctx) => {
@@ -27,21 +32,39 @@ export default function Target() {
   type TargetFormData = z.infer<typeof targetSchema>;
 
   const {
-    handleSubmit,
+    reset,
     control,
+    handleSubmit,
     formState: { errors },
   } = useForm<TargetFormData>({
     resolver: zodResolver(targetSchema),
     defaultValues: {
       name: "",
-      value: 0,
+      amount: 0,
     },
   });
 
-  console.log(errors);
+  async function handleCreateTarget(data: TargetFormData) {
+    try {
+      setLoading(true);
+      await create(data);
 
-  const onSubmit = (data: TargetFormData) => {
+      Alert.alert("Nova meta", "Meta criada com sucesso!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+
+      reset();
+    } catch (error: any) {
+      Alert.alert("Erro", "Não foi possível criar a meta!");
+      console.log("error", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const onSubmit = async (data: TargetFormData) => {
     console.log(data);
+    handleCreateTarget(data);
   };
 
   return (
@@ -67,18 +90,22 @@ export default function Target() {
         />
         <Controller
           control={control}
-          name="value"
+          name="amount"
           render={({ field: { onChange, value } }) => (
             <CurrencyInput
               label="Valor alvo (R$)"
               onChangeValue={(value) => onChange(value ?? 0)}
               value={value}
-              error={Boolean(errors.value)}
-              textError={errors.value?.message}
+              error={Boolean(errors.amount)}
+              textError={errors.amount?.message}
             />
           )}
         />
-        <Button title="Salvar" onPress={handleSubmit(onSubmit)} />
+        <Button
+          title="Salvar"
+          onPress={handleSubmit(onSubmit)}
+          isProcessing={loading}
+        />
       </View>
     </View>
   );

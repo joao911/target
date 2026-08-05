@@ -1,10 +1,14 @@
 import { View, StatusBar } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 import { HomeHeader } from "@/components/HomeHeader";
-import { Target } from "@/components/Target";
+import { Target, TargetProps } from "@/components/Target";
 import { List } from "@/components/List";
 import { Button } from "@/components/Button";
+import { useCallback, useState } from "react";
+import { Loading } from "@/components/Loading";
+import { currency } from "@/utils/formarCurrency";
+import { useTargetDataBase } from "@/database/useTargetDataBase";
 
 const summary = {
   total: "R$ 2.680,00",
@@ -12,30 +16,40 @@ const summary = {
   output: { label: "Saidas", value: "R$ 20,00" },
 };
 
-const targets = [
-  {
-    id: "1",
-    name: "Comprar uma cadeira ergonômica",
-    percentage: "75%",
-    current: "R$ 9000,00",
-    target: "R$ 1.200,00",
-  },
-  {
-    id: "2",
-    name: "Comprar uma cadeira ergonômica",
-    percentage: "75%",
-    current: "R$ 9000,00",
-    target: "R$ 1.200,00",
-  },
-  {
-    id: "3",
-    name: "Comprar uma cadeira ergonômica",
-    percentage: "75%",
-    current: "R$ 9000,00",
-    target: "R$ 1.200,00",
-  },
-];
 export default function Index() {
+  const { listBySavedValue } = useTargetDataBase();
+  const [loading, setLoading] = useState(true);
+  const [targets, setTargets] = useState<TargetProps[]>([]);
+
+  async function fetchTargets(): Promise<TargetProps[]> {
+    const response = await listBySavedValue();
+
+    return response.map((item) => ({
+      id: String(item.id),
+      name: item.name,
+      current: currency(item.current),
+      target: String(item.amount),
+      percentage: item.percentage.toFixed(0) + "%",
+    }));
+  }
+
+  async function fetchData() {
+    const targetDataPromise = fetchTargets();
+    const [targetData] = await Promise.all([targetDataPromise]);
+    setTargets(targetData);
+    setLoading(false);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, []),
+  );
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <StatusBar
