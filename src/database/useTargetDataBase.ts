@@ -5,6 +5,10 @@ export type ITargetCreate = {
   amount: number;
 };
 
+export type ITargetUpdate = ITargetCreate & {
+  id: number;
+};
+
 export type ITargetResponse = {
   name: string;
   amount: number;
@@ -62,9 +66,35 @@ export function useTargetDataBase() {
         WHERE targets.id = ${id}
       `);
   }
+
+  async function updateById(data: ITargetUpdate) {
+    const statement = await dataBase.prepareSync(`
+    UPDATE targets SET 
+     name = $name,
+     amount = $amount,
+     updated_at = CURRENT_TIMESTAMP
+    WHERE id = $id
+    `);
+    statement.executeAsync({
+      $id: data.id,
+      $name: data.name,
+      $amount: data.amount,
+    });
+  }
+
+  async function deleteById(id: number) {
+    const statement = await dataBase.prepareSync(`
+    DELETE FROM targets WHERE id = $id
+    `);
+    statement.executeAsync({
+      $id: id,
+    });
+  }
   return {
     create,
     listBySavedValue,
     getByID,
+    updateById,
+    deleteById,
   };
 }

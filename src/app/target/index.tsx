@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Alert } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -12,8 +12,10 @@ import { CurrencyInput } from "@/components/CyrrencyInput ";
 import { useTargetDataBase } from "@/database/useTargetDataBase";
 
 export default function Target() {
-  const { create } = useTargetDataBase();
+  const params = useLocalSearchParams();
+  const { create, getByID, updateById, deleteById } = useTargetDataBase();
   const [loading, setLoading] = useState(false);
+
   const targetSchema = z.object({
     name: z.string().min(5, "Nome obrigatório"),
     amount: z
@@ -44,6 +46,25 @@ export default function Target() {
     },
   });
 
+  async function handleUpdateById(data: TargetFormData, id: number) {
+    try {
+      setLoading(true);
+      await updateById({
+        id,
+        name: data.name,
+        amount: data.amount,
+      });
+      Alert.alert("Meta atualizada", "Meta atualizada com sucesso!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      Alert.alert("Erro", "Não foi possível atualizar a meta!");
+      console.log("error", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleCreateTarget(data: TargetFormData) {
     try {
       setLoading(true);
@@ -62,16 +83,66 @@ export default function Target() {
     }
   }
 
+  async function getDetails(id: string) {
+    try {
+      const response = await getByID(Number(id));
+
+      console.log("response", response);
+
+      reset({
+        name: response?.name || "",
+        amount: response?.amount || 0,
+      });
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível criar a meta!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+      console.log("error", error);
+    }
+  }
+
+  async function handleDeleteById(id: number) {
+    try {
+      setLoading(true);
+      await deleteById(id);
+      Alert.alert("Meta deletada", "Meta deletada com sucesso!", [
+        { text: "OK", onPress: () => router.replace("/") },
+      ]);
+    } catch (error: any) {
+      Alert.alert("Erro", "Não foi possível deletar a meta!");
+      console.log("error", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const onSubmit = async (data: TargetFormData) => {
-    console.log(data);
-    handleCreateTarget(data);
+    if (params.id) {
+      handleUpdateById(data, Number(params.id));
+    } else {
+      handleCreateTarget(data);
+    }
   };
+
+  useEffect(() => {
+    if (params.id) {
+      getDetails(String(params.id));
+    }
+  }, [params.id]);
 
   return (
     <View style={{ flex: 1, padding: 24 }}>
       <PageHeader
         title="Meta"
         subTitle="Economize para alcançar seus objetivos"
+        rightButton={
+          params.id
+            ? {
+                icon: "delete",
+                onPress: () => handleDeleteById(Number(params.id)),
+              }
+            : undefined
+        }
       />
       <View style={{ marginTop: 32, gap: 24 }}>
         <Controller
