@@ -1,18 +1,22 @@
 import { View } from "react-native";
 import { useCallback, useState } from "react";
+import { map } from "lodash";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 
 import { List } from "@/components/List";
 import { Button } from "@/components/Button";
 import { Loading } from "@/components/Loading";
 import { Progress } from "@/components/Progress";
+import { currency } from "@/utils/formarCurrency";
 import { PageHeader } from "@/components/PageHeader";
-import { TransactionTypes } from "@/utils/transationtypes";
 import { useTargetDataBase } from "@/database/useTargetDataBase";
 import { Transaction, TransactionProps } from "@/components/Transaction";
-import { currency } from "@/utils/formarCurrency";
+import { useTransactionsDatabase } from "@/database/useTransactionDataBase";
+import { TransactionTypes } from "@/utils/transationtypes";
 
 export default function InProgress() {
+  const [transactions, setTransactions] = useState<TransactionProps[]>([]);
+  const { listById, remove } = useTransactionsDatabase();
   const param = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
 
@@ -43,31 +47,48 @@ export default function InProgress() {
     }
   }
 
-  const transactions: TransactionProps[] = [
-    {
-      id: "1",
-      value: "R$ 50,00",
-      date: "2023-01-01",
-      description: "Tem descriçao",
-      type: TransactionTypes.Input,
-    },
-    {
-      id: "2",
-      value: "R$ 50,00",
-      date: "2023-01-01",
-      description: "Tem descriçao",
-      type: TransactionTypes.Output,
-    },
-  ];
+  async function getTransactions() {
+    try {
+      setLoading(true);
+      const response = await listById(String(param.id));
+      console.log("response", response);
+      setTransactions(
+        map(response, (item) => ({
+          id: String(item.id),
+          value: String(item.amount),
+          date: String(item.created_at),
+          description: String(item.observation),
+          type:
+            item.amount > 0 ? TransactionTypes.Input : TransactionTypes.Output,
+        })),
+      );
+    } catch (error: any) {
+      console.log("getTransactions error", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
       getData(String(param.id));
+      getTransactions();
     }, []),
   );
 
   if (loading) {
     return <Loading />;
+  }
+
+  async function handleRemove(id: string) {
+    try {
+      console.log("id", id);
+      await remove(id);
+      await getTransactions();
+      await getData(String(param.id));
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -85,7 +106,12 @@ export default function InProgress() {
         data={transactions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Transaction data={item} onRemove={() => {}} />
+          <Transaction
+            data={item}
+            onRemove={() => {
+              handleRemove(item.id);
+            }}
+          />
         )}
         emptyMessage="Nenhuma transação cadastrada, toque para adicionar dinheiro"
       />

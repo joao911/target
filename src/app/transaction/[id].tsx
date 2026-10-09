@@ -48,7 +48,6 @@ export default function Transaction() {
   });
 
   const handleSubmitForm = async (data: TargetFormData) => {
-    console.log("data", data);
     try {
       await create({
         target_id: Number(param.id),

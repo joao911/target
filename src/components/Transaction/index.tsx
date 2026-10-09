@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { colors } from "@/theme";
 import { TransactionTypes } from "@/utils/transationtypes";
+import datesHelper from "@/utils/date";
 
 export type TransactionProps = {
   id: string;
@@ -37,7 +38,8 @@ export const Transaction = ({ data, onRemove }: Props) => {
       <View style={styles.info}>
         <Text style={styles.value}>{data.value}</Text>
         <Text style={styles.description} numberOfLines={1}>
-          {data.date} • {data.description && `- ${data.description}`}
+          {datesHelper.formatDateWithHour(data.date)} •{" "}
+          {data.description && `- ${data.description}`}
         </Text>
       </View>
       <TouchableOpacity activeOpacity={0.8} onPress={onRemove}>
