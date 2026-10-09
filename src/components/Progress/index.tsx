@@ -13,7 +13,6 @@ type Props = {
 };
 
 export const Progress = ({ data }: Props) => {
-  console.log("dentro do componente", data);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Valor guardado</Text>

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { useCallback, useState } from "react";
 import { map } from "lodash";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
@@ -51,7 +51,6 @@ export default function InProgress() {
     try {
       setLoading(true);
       const response = await listById(String(param.id));
-      console.log("response", response);
       setTransactions(
         map(response, (item) => ({
           id: String(item.id),
@@ -80,9 +79,15 @@ export default function InProgress() {
     return <Loading />;
   }
 
-  async function handleRemove(id: string) {
+  function handleRemoveTransaction(id: string) {
+    Alert.alert("Remover", "Tem certeza que deseja remover essa transação?", [
+      { text: "Não", style: "cancel" },
+      { text: "Sim", onPress: () => removeTransaction(id) },
+    ]);
+  }
+
+  async function removeTransaction(id: string) {
     try {
-      console.log("id", id);
       await remove(id);
       await getTransactions();
       await getData(String(param.id));
@@ -109,7 +114,7 @@ export default function InProgress() {
           <Transaction
             data={item}
             onRemove={() => {
-              handleRemove(item.id);
+              handleRemoveTransaction(item.id);
             }}
           />
         )}

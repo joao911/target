@@ -19,11 +19,15 @@ export type ITargetResponse = {
   updated_at: Date;
 };
 
+export type ISummary = {
+  input: number;
+  output: number;
+};
+
 export function useTargetDataBase() {
   const dataBase = useSQLiteContext();
 
   async function create(data: ITargetCreate) {
-    console.log("dentro do create", data);
     const statement = await dataBase.prepareAsync(
       "INSERT INTO targets (name, amount) VALUES ($name, $amount)",
     );
@@ -90,11 +94,21 @@ export function useTargetDataBase() {
       $id: id,
     });
   }
+
+  function resume() {
+    return dataBase.getFirstAsync<ISummary>(`
+    SELECT
+      COALESCE(SUM(CASE WHEN amount > 0 THEN amount END), 0) AS input,
+      COALESCE(SUM(CASE WHEN amount < 0 THEN amount END), 0) AS output
+    FROM transactions
+  `);
+  }
   return {
     create,
     listBySavedValue,
     getByID,
     updateById,
     deleteById,
+    resume,
   };
 }
