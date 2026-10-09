@@ -17,11 +17,20 @@ export function useTransactionsDatabase() {
           ($target_id, $amount, $observation)
       `);
 
-    statement.executeAsync({
-      $target_id: data.target_id,
-      $amount: data.amount,
-      $observation: data.observation ?? null,
-    });
+    // statement.executeAsync({
+    //   $target_id: data.target_id,
+    //   $amount: data.amount,
+    //   $observation: data.observation ?? null,
+    // });
+    try {
+      await statement.executeAsync({
+        $target_id: data.target_id,
+        $amount: data.amount,
+        $observation: data.observation ?? null,
+      });
+    } finally {
+      await statement.finalizeAsync();
+    }
   }
 
   return { create };

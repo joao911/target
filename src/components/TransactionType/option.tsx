@@ -1,28 +1,25 @@
-import { ColorValue, Pressable, Text, PressableProps } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { styles } from "./styles";
-import { colors } from "@/theme";
+import { MaterialIcons } from '@expo/vector-icons'
+import { ColorValue, Pressable, PressableProps, Text } from 'react-native'
+import { styles } from './styles'
+import { colors } from '@/theme'
 
-interface Props extends PressableProps {
-  isSelected: boolean;
-  title: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  selectedColor: ColorValue;
+type Props = PressableProps & {
+  isSelected: boolean
+  title: string
+  icon: keyof typeof MaterialIcons.glyphMap
+  selectedColor: ColorValue
 }
 
 export function Option({
-  icon,
-  title,
   isSelected,
+  title,
+  icon,
   selectedColor,
   ...rest
 }: Props) {
   return (
     <Pressable
-      style={[
-        styles.container,
-        isSelected && { backgroundColor: selectedColor },
-      ]}
+      style={[styles.option, isSelected && { backgroundColor: selectedColor }]}
       {...rest}
     >
       <MaterialIcons
@@ -34,5 +31,5 @@ export function Option({
         {title}
       </Text>
     </Pressable>
-  );
+  )
 }
