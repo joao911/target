@@ -1,4 +1,4 @@
-import { Alert, View } from "react-native";
+import { Alert, StatusBar, View } from "react-native";
 import { useCallback, useState } from "react";
 import { map } from "lodash";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
@@ -98,6 +98,7 @@ export default function InProgress() {
 
   return (
     <View style={{ flex: 1, padding: 24, gap: 32 }}>
+      <StatusBar barStyle="dark-content" />
       <PageHeader
         title={details.name}
         rightButton={{
